@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-image: linear-gradient(#B993D6, #8CA6DB);
+            background-repeat: no-repeat;
+            background-size: 100% 100vh;
+            display: flex;
+            justify-content: center;
+        }
+
+        .tictactoe-container {
+            width: 400px;
+            height: 400px;
+            margin-top: 50px;
+            display: flex;
+            flex-wrap: wrap;
+            border-radius: 20px;
+            overflow: hidden;
+        }
+
+        .tictactoe-item:nth-child(1) {
+            border-radius: 20px 0 0 0;
+        }
+
+        .tictactoe-item:nth-child(3) {
+            border-radius: 0 20px 0 0;
+        }
+
+        img {
+            max-width: 80%;
+        }
+
+        .tictactoe-item:nth-child(7) {
+            border-radius: 0 0 0 20px;
+        }
+
+        .tictactoe-item:nth-child(9) {
+            border-radius: 0 0 20px 0;
+        }
+
+        .tictactoe-item {
+            width: 33.333333%;
+            height: 33.33333333%;
+            border: 1px solid black;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 50px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="tictactoe-container">
+            <div class="tictactoe-item"></div>
+            <div class="tictactoe-item"></div>
+            <div class="tictactoe-item"></div>
+            <div class="tictactoe-item"></div>
+            <div class="tictactoe-item"></div>
+            <div class="tictactoe-item"></div>
+            <div class="tictactoe-item"></div>
+            <div class="tictactoe-item"></div>
+            <div class="tictactoe-item"></div>
+        </div>
+    </div>
+
+    <script>
+        const square = document.querySelectorAll(".tictactoe-item");
+        const options = ["x", "o"];
+        let player1 = 0;
+        const winningPositions = [
+            [0, 1, 2],
+            [3, 4, 5],
+            [6, 7, 8],
+            [0, 3, 6],
+            [1, 4, 7],
+            [2, 5, 8],
+            [0, 4, 8],
+            [2, 4, 6]
+        ]
+        let steps = {
+            x: [],
+            o: []
+        }
+        const indexes = Array(9).fill(0).map((item, index) => index) // [0,1,2,3,4,5,6,7,8]
+
+
+        const setWinner = (winner) => {
+            alert(`${winner} wins!`)
+            steps = {
+                x: [],
+                o: []
+            }
+            player1 = 0
+            square.forEach(elem => {
+                elem.innerHTML = "";
+            })
+        }
+
+        const getFreeSquares = () => indexes.filter(item => ![...steps.x, ...steps.o].includes(item)) // get not filled indexes of our squares
+
+        square.forEach((item, index) => {
+            item.addEventListener("click", function (e) {
+
+                if(!getFreeSquares().includes(index)) return; // if getFreeSquares() doesn't contain the index we pressed on, then make return 
+
+                steps[options[player1 % options.length]].push(index) // add current index to array of steps
+                item.innerHTML = `<img src="images/${options[player1 % options.length]}.png">`
+
+                setTimeout(() => {
+                    if (!checkWinner()) { // if nobody wins...
+                        player1++; 
+                        setTimeout(() => {
+                            setRandom() // this is our computer
+                        }, 100)
+                    } else { // if we have a winner
+                        setWinner(options[player1 % options.length]) //call a function to tell about it and clear the field
+                    }
+
+                }, 10)
+            })
+        })
+
+        const setRandom = () => {
+            const freeSquares = getFreeSquares()
+
+            if (freeSquares.length === 0) { // if we havn't any free squares, it means that nobody wins
+                setWinner('nobody')
+                return;
+            }
+
+            const random = Math.floor(Math.random() * freeSquares.length) // get random index of free squares
+
+            const randomIndex = freeSquares[random] // get random value via random index
+            square[randomIndex].innerHTML = `<img src="images/${options[player1 % options.length]}.png">` //set the image
+
+            steps[options[player1 % options.length]].push(randomIndex) // add a set index to object
+
+            setTimeout(() => {
+                if (!checkWinner()) {
+                    player1++;
+                } else {
+                    setWinner(options[player1 % options.length])
+                }
+            }, 50)
+        }
+
+        const checkWinner = () => {
+
+            for (let i = 0; i < winningPositions.length; i++) { // get all winning positions
+                let step = 0
+// winnignPostions[i]: [2,5,8], steps[options[player1 % options.length]][j]: [1,2,5,8]
+                for (let j = 0; j < steps[options[player1 % options.length]].length; j++) { // from 0 to all steps of player
+                    if (winningPositions[i].includes(steps[options[player1 % options.length]][j])) { // if step matches with any of values of winning postions
+                        step++ //increase this value
+                    }
+                }
+
+                if (step === 3) {
+                    return true;
+                }
+            }
+            return false;
+
+        }
+    </script>
+</body>
+
+</html>
